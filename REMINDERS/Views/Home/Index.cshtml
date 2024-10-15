@@ -1,0 +1,190 @@
+﻿@{
+    var urlAnadirRecordatorio = Url.Action("AnadirRecordatorio", "Home", RouteTable.Routes);
+    var urlEnviarArchivos = Url.Action("EnviarArchivos", "Home", RouteTable.Routes);
+    var urlCargarRecordatorios = Url.Action("CargarRecordatorios", "Home", RouteTable.Routes);
+    var urlCargarRecordatorio = Url.Action("CargarRecordatorio", "Home", RouteTable.Routes);
+    var urlModificarRecordatorio = Url.Action("ModificarRecordatorio", "Home", RouteTable.Routes);
+    var urlEliminarRecordatorio = Url.Action("EliminarRecordatorio", "Home", RouteTable.Routes);
+    var urlCargarTipoDocumentos = Url.Action("CargarTipoDocumentos", "Home", RouteTable.Routes);
+}
+<html>
+<script language="javascript" src="~/Scripts/jquery-3.4.1.js"></script>
+<script type="text/javascript">
+function AnadirNotificacion() {
+
+    $.ajax({
+        type: 'POST',
+        url: '@urlAnadirRecordatorio',
+        data: {
+            'tdocumento': document.getElementById("tdocumento").value,
+            'finicio': document.getElementById("finicio").value,
+            'ffin': document.getElementById("ffin").value,
+            'hora': document.getElementById("hora").value,
+            'minuto': document.getElementById("minuto").value,
+            'periodicidad': document.getElementById("periodicidad").value,
+            'recordatorio': document.getElementById("recordatorio").value,
+            'textoEmail': document.getElementById("textoEmail").value,
+            'textoEmail': document.getElementById("textoEmail").value
+        }
+
+        }).done(function (response) {
+            document.getElementById("id_reminder").value = response;
+            document.getElementById("frmArchivos").submit();
+        });
+    }
+
+    function Borrar() {
+            if (confirm("Vas a borrar todos los datos del formulario") == true) {
+                document.getElementById("frmREMINDERS").reset();
+                return true;
+            }
+        }
+
+    function CargarRecordatorios() {
+        $.ajax({
+           // type: 'POST',
+            url: '@urlCargarRecordatorios',
+            data: {
+
+                }
+                //   context: document.body
+        }).done(function (response) {
+            document.getElementById("selRecordatorio").innerHTML = response;
+            });
+    }
+
+
+    function CargarTipoDocumentos() {
+        $.ajax({
+           // type: 'POST',
+            url: '@urlCargarTipoDocumentos',
+            data: {
+
+                }
+                //   context: document.body
+        }).done(function (response) {
+            document.getElementById("seltdocumento").innerHTML = response;
+            });
+    }
+
+    function CargarRecordatorio(recordatorio) {
+
+        $.ajax({
+            type: 'POST',
+            url: '@urlCargarRecordatorio',
+            data: {
+                'id_recordatorio': recordatorio.value
+                }
+                //   context: document.body
+        }).done(function (response) {
+            //window.alert(String(response.finicio));
+            document.getElementById("hora").value = String(response.hora);
+            document.getElementById("minuto").value = String(response.minuto);
+            document.getElementById("periodicidad").value = String(response.periodicidad);
+            document.getElementById("textoEmail").value = String(response.textoemail);
+            document.getElementById("finicio").value = Date.parse(response.finicio);
+            document.getElementById("lfinicio").innerHTML = response.finicio;
+            document.getElementById("lffin").innerHTML = String(response.ffin);
+            document.getElementById("lrecordatorio").innerHTML = String(response.nextreminder);
+            document.getElementById("id_reminder").value = recordatorio.value;
+        });
+
+    }
+
+    function LimpiarEtiquetas() {
+            document.getElementById("lfinicio").innerHTML = "";
+            document.getElementById("lffin").innerHTML = "";
+            document.getElementById("lrecordatorio").innerHTML = "";
+    }
+
+    function ModificarRecordatorio() {
+        var xFinicio;
+        var xFfin;
+        var xrecordatorio;
+
+        if (document.getElementById("finicio").value != "") {
+            xFinicio = document.getElementById("finicio").value;
+        } else {
+            xFinicio = document.getElementById("lfinicio").innerHTML;
+        }
+
+        if (document.getElementById("ffin").value != "") {
+            xFfin = document.getElementById("ffin").value;
+        } else {
+            xFfin = document.getElementById("lffin").innerHTML;
+        }
+
+
+        if (document.getElementById("recordatorio").value != "") {
+            xrecordatorio = document.getElementById("recordatorio").value;
+        } else {
+            xrecordatorio = document.getElementById("lrecordatorio").innerHTML;
+        }
+
+         $.ajax({
+            type: 'POST',
+            url: '@urlModificarRecordatorio',
+             data: {
+                'id_recordatorio': document.getElementById("id_reminder").value,
+                 'tdocumento': document.getElementById("tdocumento").value,
+                 'finicio': xFinicio,
+                 'ffin': xFfin,
+                'hora': document.getElementById("hora").value,
+                'minuto': document.getElementById("minuto").value,
+                 'periodicidad': document.getElementById("periodicidad").value,
+                 'recordatorio': xrecordatorio,
+                'textoEmail': document.getElementById("textoEmail").value,
+                'textoEmail': document.getElementById("textoEmail").value
+            }
+           //        context: document.body
+        }).done(function (response) {
+            window.alert(response);
+            document.getElementById("frmREMINDERS").reset();
+            document.getElementById("frmArchivos").reset();
+            window.location.reload();
+          //  document.getElementById("id_reminder").value = response;
+           // document.getElementById("frmArchivos").submit();
+        });
+    }
+
+    function EliminarRecordatorio() {
+        $.ajax({
+            type: 'POST',
+            url: '@urlEliminarRecordatorio',
+            data: {
+                'id_reminder': document.getElementById("id_reminder").value
+            }
+            //   context: document.body
+        }).done(function (response) {
+            window.alert(response);
+            document.getElementById("frmREMINDERS").reset();
+            document.getElementById("frmArchivos").reset();
+            window.location.reload();
+        })
+    }
+
+
+
+</script>
+<body onload="javascript: CargarRecordatorios();CargarTipoDocumentos();">
+    <label>Seleccionar recordatorio<select id="selRecordatorio" name="selRecordatorio" onchange="CargarRecordatorio(this)"></select></label><input type="button" value="Cargar Recordatorios" />
+    <form enctype="multipart/form-data" method="post" id="frmArchivos" name="frmArchivos" action="@urlEnviarArchivos">
+        <label><input type="FILE" name="file" id="file" multiple /></label>
+        <input type="hidden" id="id_reminder" name="id_reminder" />
+    </form>
+    <form id="frmREMINDERS" name="frmREMINDERS" method="post" action="javascript:AnadirNotificacion();" onreset="LimpiarEtiquetas();">
+        <fieldset><label>Tipo de documento&nbsp;<select name="tdocumento" id="seltdocumento"></select></label></fieldset>
+        <fieldset><label id="lblfinicio">Fecha de inicio&nbsp;<input name="finicio" id="finicio" type="date" /></label><label id="lfinicio"></label></fieldset>
+        <fieldset><label>Fecha de fin&nbsp;<input type="date" name="ffin" id="ffin" /></label><label id="lffin"></label></fieldset>
+        <fieldset><label>Siguiente recordatorio&nbsp;<input name="recordatorio" id="recordatorio" type="datetime-local" /></label><label id="lrecordatorio"></label></fieldset>
+        <fieldset><label>Hora&nbsp;<input type="text" size="2" name="hora" id="hora" /></label></fieldset>
+        <fieldset><label>Minuto&nbsp;<input type="text" size="2" name="minuto" id="minuto" /></label></fieldset>
+        <fieldset><label>Periodicidad de recordatorio&nbsp;<select id="periodicidad"><option value="01">Ahora mismo</option><option value="02">Recordar una vez</option><option value="03">Recordar con periodicidad</option></select></label></fieldset>
+        <fieldset><label>Texto del e-mail</label><br /><textarea name="textoEmail" id="textoEmail" style="width:600px; height:100px"></textarea></fieldset>
+
+        <fieldset><input type="reset" value="Borrar" />&nbsp;&nbsp;<input type="submit" value="A&ntilde;adir" />&nbsp;&nbsp;<input type="button" value="Modificar" onclick="ModificarRecordatorio()" />&nbsp;&nbsp;<input type="button" value="Eliminar" onclick="javascript: EliminarRecordatorio();" /></fieldset>
+    </form>
+    
+</body>
+</html>
+
